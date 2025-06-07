@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql" // Change to "postgresql" if needed
+  url      = env("DATABASE_URL")
+}
+
+// ====== MASTER DATA ======
+
+model Package {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?
+  price       Decimal
+  sessions    Session[] // Relation: one package has many sessions (template)
+  students    Student[] // Relation: one package chosen by many students
+}
+
+model Session {
+  id          Int       @id @default(autoincrement())
+  packageId   Int       @map("package_id")
+  order       Int       // session order: 1st, 2nd, etc.
+  title       String?
+  description String?
+  package     Package   @relation(fields: [packageId], references: [id])
+  materials   SessionMaterial[] // Default materials per package session (optional)
+  progress    StudentSession[]  // Student progress on this session (optional)
+
+  @@index([packageId])
+}
+
+model Material {
+  id          Int               @id @default(autoincrement())
+  name        String
+  description String?
+  sessions    SessionMaterial[]
+}
+
+// Relation for default materials in package sessions (can be used when generating student progress)
+model SessionMaterial {
+  id         Int      @id @default(autoincrement())
+  sessionId  Int      @map("session_id")
+  materialId Int      @map("material_id")
+  session    Session  @relation(fields: [sessionId], references: [id])
+  material   Material @relation(fields: [materialId], references: [id])
+
+  @@index([sessionId])
+  @@index([materialId])
+}
+
+// ====== USER & INSTRUCTOR ======
+
+model Instructor {
+  id       Int       @id @default(autoincrement())
+  name     String
+  students Student[]
+}
+
+// ====== STUDENT & PROGRESS ======
+
+model Student {
+  id           Int              @id @default(autoincrement())
+  name         String
+  email        String?          @unique
+  phoneNumber  String?          @map("phone_number")
+  address      String?
+  registerDate DateTime?        @map("register_date")
+  uniqueCode   String?          @unique @map("unique_code")
+  userId       Int?             @map("user_id")
+  instructorId Int?             @map("instructor_id")
+  packageId    Int?             @map("package_id")
+  instructor   Instructor?      @relation(fields: [instructorId], references: [id])
+  package      Package?         @relation(fields: [packageId], references: [id])
+  progress     StudentSession[]
+  finances     Finance[]
+
+  @@index([instructorId])
+  @@index([packageId])
+}
+
+// Student progress for each session (tracking attendance, notes, status, etc.)
+model StudentSession {
+  id         Int       @id @default(autoincrement())
+  studentId  Int       @map("student_id")
+  sessionId  Int       @map("session_id")
+  date       DateTime?
+  status     String?   // present, absent, excused, etc.
+  notes      String?
+  student    Student   @relation(fields: [studentId], references: [id])
+  session    Session   @relation(fields: [sessionId], references: [id])
+
+  @@index([studentId])
+  @@index([sessionId])
+}
+
+// ====== STUDENT FINANCES ======
+
+model Finance {
+  id          Int      @id @default(autoincrement())
+  studentId   Int      @map("student_id")
+  date        DateTime
+  amount      Decimal
+  type        String   // income/expense
+  description String?
+  student     Student  @relation(fields: [studentId], references: [id])
+
+  @@index([studentId])
+}
