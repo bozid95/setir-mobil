@@ -87,7 +87,7 @@ class StudentsRelationManager extends RelationManager
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->form(fn(Tables\Actions\EditAction $action): array => [
-                        Forms\Components\DateTimePicker::make('date')
+                        Forms\Components\DatePicker::make('date')
                             ->required(),
                         Forms\Components\Select::make('status')
                             ->options([
