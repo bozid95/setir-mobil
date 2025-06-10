@@ -50,11 +50,8 @@ class StudentResource extends Resource
                         Forms\Components\Select::make('package_id')
                             ->relationship('package', 'name')
                             ->required()
-                            ->preload(),
-                        Forms\Components\Select::make('instructor_id')
-                            ->relationship('instructor', 'name')
-                            ->required()
-                            ->preload(),
+                            ->preload()
+                            ->helperText('Select the training package for this student'),
                     ]),
             ]);
     }
@@ -75,9 +72,6 @@ class StudentResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('package.name')
                     ->label('Package')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('instructor.name')
-                    ->label('Instructor')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('sessions_count')
                     ->counts('sessions')

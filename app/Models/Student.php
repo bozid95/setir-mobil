@@ -24,7 +24,6 @@ class Student extends Model
         'register_date',
         'unique_code',
         'user_id',
-        'instructor_id',
         'package_id',
     ];
 
@@ -70,14 +69,6 @@ class Student extends Model
     }
 
     /**
-     * Get the instructor that owns the student.
-     */
-    public function instructor(): BelongsTo
-    {
-        return $this->belongsTo(Instructor::class);
-    }
-
-    /**
      * Get the student sessions for this student.
      */
     public function studentSessions(): HasMany
@@ -91,7 +82,7 @@ class Student extends Model
     public function sessions(): BelongsToMany
     {
         return $this->belongsToMany(Session::class, 'student_sessions')
-            ->withPivot(['date', 'status', 'notes'])
+            ->withPivot(['date', 'status', 'notes', 'score', 'grade', 'instructor_feedback'])
             ->withTimestamps();
     }
 

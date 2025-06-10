@@ -71,11 +71,11 @@ class DrivingSchoolSeeder extends Seeder
 
         // Basic package sessions
         $basicSessions = [
-            ['package_id' => $basicPackage->id, 'order' => 1, 'title' => 'Introduction to Driving', 'description' => 'Get familiar with the car and basic controls'],
-            ['package_id' => $basicPackage->id, 'order' => 2, 'title' => 'Basic Maneuvers', 'description' => 'Practice starting, stopping, and turning'],
-            ['package_id' => $basicPackage->id, 'order' => 3, 'title' => 'Road Rules', 'description' => 'Learn important road rules and signs'],
-            ['package_id' => $basicPackage->id, 'order' => 4, 'title' => 'Parking Practice', 'description' => 'Practice different parking techniques'],
-            ['package_id' => $basicPackage->id, 'order' => 5, 'title' => 'Final Assessment', 'description' => 'Evaluate your driving skills'],
+            ['package_id' => $basicPackage->id, 'instructor_id' => 1, 'order' => 1, 'title' => 'Introduction to Driving', 'description' => 'Get familiar with the car and basic controls'],
+            ['package_id' => $basicPackage->id, 'instructor_id' => 1, 'order' => 2, 'title' => 'Basic Maneuvers', 'description' => 'Practice starting, stopping, and turning'],
+            ['package_id' => $basicPackage->id, 'instructor_id' => 2, 'order' => 3, 'title' => 'Road Rules', 'description' => 'Learn important road rules and signs'],
+            ['package_id' => $basicPackage->id, 'instructor_id' => 2, 'order' => 4, 'title' => 'Parking Practice', 'description' => 'Practice different parking techniques'],
+            ['package_id' => $basicPackage->id, 'instructor_id' => 3, 'order' => 5, 'title' => 'Final Assessment', 'description' => 'Evaluate your driving skills'],
         ];
 
         foreach ($basicSessions as $sessionData) {
@@ -84,9 +84,9 @@ class DrivingSchoolSeeder extends Seeder
 
         // Advanced package sessions (just a few examples)
         $advancedSessions = [
-            ['package_id' => $advancedPackage->id, 'order' => 1, 'title' => 'Advanced Vehicle Control', 'description' => 'Master precise vehicle control techniques'],
-            ['package_id' => $advancedPackage->id, 'order' => 2, 'title' => 'Defensive Driving', 'description' => 'Learn to anticipate and avoid hazards'],
-            ['package_id' => $advancedPackage->id, 'order' => 3, 'title' => 'Night Driving', 'description' => 'Practice driving safely at night'],
+            ['package_id' => $advancedPackage->id, 'instructor_id' => 2, 'order' => 1, 'title' => 'Advanced Vehicle Control', 'description' => 'Master precise vehicle control techniques'],
+            ['package_id' => $advancedPackage->id, 'instructor_id' => 3, 'order' => 2, 'title' => 'Defensive Driving', 'description' => 'Learn to anticipate and avoid hazards'],
+            ['package_id' => $advancedPackage->id, 'instructor_id' => 1, 'order' => 3, 'title' => 'Night Driving', 'description' => 'Practice driving safely at night'],
         ];
 
         foreach ($advancedSessions as $sessionData) {
@@ -102,7 +102,6 @@ class DrivingSchoolSeeder extends Seeder
                 'address' => 'Jl. Sudirman No. 123',
                 'register_date' => now(),
                 'unique_code' => 'STD-001',
-                'instructor_id' => 1,
                 'package_id' => 1,
             ],
             [
@@ -112,7 +111,6 @@ class DrivingSchoolSeeder extends Seeder
                 'address' => 'Jl. Thamrin No. 456',
                 'register_date' => now(),
                 'unique_code' => 'STD-002',
-                'instructor_id' => 2,
                 'package_id' => 2,
             ],
         ];

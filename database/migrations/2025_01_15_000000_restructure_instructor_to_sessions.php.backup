@@ -1,0 +1,83 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     * 
+     * Restructure the database so instructors are associated with sessions
+     * instead of students, and add grading system.
+     */
+    public function up(): void
+    {
+        // 1. Add instructor_id to driving_sessions table
+        Schema::table('driving_sessions', function (Blueprint $table) {
+            $table->foreignId('instructor_id')->nullable()->constrained()->nullOnDelete()->after('package_id');
+            $table->index('instructor_id');
+        });
+
+        // 2. Add grading columns to student_sessions table
+        Schema::table('student_sessions', function (Blueprint $table) {
+            $table->decimal('score', 5, 2)->nullable()->after('status')->comment('Score out of 100');
+            $table->string('grade', 2)->nullable()->after('score')->comment('Letter grade: A, B, C, D, F');
+            $table->text('instructor_feedback')->nullable()->after('grade');
+        });
+
+        // 3. Migrate existing instructor assignments
+        // Move instructor assignments from students to their sessions
+        DB::statement("
+            UPDATE driving_sessions ds
+            INNER JOIN student_sessions ss ON ds.id = ss.session_id
+            INNER JOIN students s ON ss.student_id = s.id
+            SET ds.instructor_id = s.instructor_id
+            WHERE s.instructor_id IS NOT NULL
+            AND ds.instructor_id IS NULL
+        ");
+
+        // 4. Remove instructor_id from students table
+        Schema::table('students', function (Blueprint $table) {
+            $table->dropForeign(['instructor_id']);
+            $table->dropIndex(['instructor_id']);
+            $table->dropColumn('instructor_id');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        // 1. Add instructor_id back to students table
+        Schema::table('students', function (Blueprint $table) {
+            $table->foreignId('instructor_id')->nullable()->constrained()->nullOnDelete()->after('package_id');
+            $table->index('instructor_id');
+        });
+
+        // 2. Migrate instructor assignments back to students
+        DB::statement("
+            UPDATE students s
+            INNER JOIN student_sessions ss ON s.id = ss.student_id
+            INNER JOIN driving_sessions ds ON ss.session_id = ds.id
+            SET s.instructor_id = ds.instructor_id
+            WHERE ds.instructor_id IS NOT NULL
+            AND s.instructor_id IS NULL
+        ");
+
+        // 3. Remove grading columns from student_sessions table
+        Schema::table('student_sessions', function (Blueprint $table) {
+            $table->dropColumn(['score', 'grade', 'instructor_feedback']);
+        });
+
+        // 4. Remove instructor_id from driving_sessions table
+        Schema::table('driving_sessions', function (Blueprint $table) {
+            $table->dropForeign(['instructor_id']);
+            $table->dropIndex(['instructor_id']);
+            $table->dropColumn('instructor_id');
+        });
+    }
+};

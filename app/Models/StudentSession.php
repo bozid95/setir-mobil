@@ -15,9 +15,13 @@ class StudentSession extends Model
     protected $fillable = [
         'student_id',
         'session_id',
+        'instructor_id',
         'date',
         'status',
         'notes',
+        'score',
+        'grade',
+        'instructor_feedback',
     ];
 
     /**
@@ -53,5 +57,15 @@ class StudentSession extends Model
     public function session(): BelongsTo
     {
         return $this->belongsTo(Session::class);
+    }
+
+    /**
+     * Get the instructor for this specific student session.
+     * This allows each student session to have a different instructor
+     * even if they are in the same session template.
+     */
+    public function instructor(): BelongsTo
+    {
+        return $this->belongsTo(Instructor::class);
     }
 }

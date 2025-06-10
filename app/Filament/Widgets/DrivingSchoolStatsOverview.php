@@ -21,8 +21,8 @@ class DrivingSchoolStatsOverview extends BaseWidget
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('success'),
 
-            Stat::make('Students with Instructors', Student::whereNotNull('instructor_id')->count())
-                ->description('Students assigned to instructors')
+            Stat::make('Active Sessions', Session::whereHas('students')->count())
+                ->description('Sessions with enrolled students')
                 ->descriptionIcon('heroicon-m-users')
                 ->color('primary'),
 

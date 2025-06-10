@@ -42,7 +42,28 @@ class SessionsRelationManager extends RelationManager
             ->recordTitleAttribute('title')
             ->columns([
                 Tables\Columns\TextColumn::make('title')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('instructor.name')
+                    ->label('Session Instructor')
+                    ->searchable()
+                    ->sortable()
+                    ->description('Default instructor for this session'),
+                Tables\Columns\TextColumn::make('assigned_instructor')
+                    ->label('Assigned Instructor')
+                    ->searchable()
+                    ->sortable()
+                    ->description('Actual instructor assigned to this student')
+                    ->getStateUsing(function ($record) {
+                        // Get the student session data from pivot
+                        $studentSession = \App\Models\StudentSession::where('student_id', request()->route('record'))
+                            ->where('session_id', $record->id)
+                            ->first();
+
+                        return $studentSession && $studentSession->instructor
+                            ? $studentSession->instructor->name
+                            : $record->instructor->name;
+                    }),
                 Tables\Columns\TextColumn::make('order')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('pivot.date')
@@ -58,6 +79,26 @@ class SessionsRelationManager extends RelationManager
                         'missed' => 'warning',
                         default => 'gray',
                     }),
+                Tables\Columns\TextColumn::make('pivot.score')
+                    ->label('Score')
+                    ->numeric(decimalPlaces: 1)
+                    ->suffix('/100')
+                    ->color(fn(?float $state): string => match (true) {
+                        $state >= 80 => 'success',
+                        $state >= 60 => 'warning',
+                        $state < 60 && $state !== null => 'danger',
+                        default => 'gray',
+                    }),
+                Tables\Columns\TextColumn::make('pivot.grade')
+                    ->label('Grade')
+                    ->badge()
+                    ->color(fn(?string $state): string => match ($state) {
+                        'A' => 'success',
+                        'B' => 'info',
+                        'C' => 'warning',
+                        'D', 'F' => 'danger',
+                        default => 'gray',
+                    }),
                 Tables\Columns\TextColumn::make('pivot.notes')
                     ->limit(30),
             ])
@@ -71,6 +112,13 @@ class SessionsRelationManager extends RelationManager
                         $action->getRecordSelect(),
                         Forms\Components\DateTimePicker::make('date')
                             ->required(),
+                        Forms\Components\Select::make('instructor_id')
+                            ->label('Assign Instructor')
+                            ->relationship('instructor', 'name')
+                            ->required()
+                            ->preload()
+                            ->helperText('Select the instructor for this specific student session')
+                            ->searchable(),
                         Forms\Components\Select::make('status')
                             ->options([
                                 'scheduled' => 'Scheduled',
@@ -80,15 +128,42 @@ class SessionsRelationManager extends RelationManager
                             ])
                             ->required()
                             ->default('scheduled'),
+                        Forms\Components\TextInput::make('score')
+                            ->numeric()
+                            ->minValue(0)
+                            ->maxValue(100)
+                            ->step(0.1)
+                            ->suffix('/100')
+                            ->helperText('Enter score out of 100'),
+                        Forms\Components\Select::make('grade')
+                            ->options([
+                                'A' => 'A (Excellent)',
+                                'B' => 'B (Good)',
+                                'C' => 'C (Fair)',
+                                'D' => 'D (Poor)',
+                                'F' => 'F (Fail)',
+                            ])
+                            ->helperText('Letter grade for the session'),
                         Forms\Components\Textarea::make('notes')
-                            ->maxLength(65535),
+                            ->maxLength(65535)
+                            ->helperText('General notes about the session'),
+                        Forms\Components\Textarea::make('instructor_feedback')
+                            ->maxLength(65535)
+                            ->helperText('Instructor feedback on student performance'),
                     ]),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->form(fn(Tables\Actions\EditAction $action): array => [
-                        Forms\Components\DatePicker::make('date')
+                        Forms\Components\DateTimePicker::make('date')
                             ->required(),
+                        Forms\Components\Select::make('instructor_id')
+                            ->label('Assign Instructor')
+                            ->relationship('instructor', 'name')
+                            ->required()
+                            ->preload()
+                            ->helperText('Select the instructor for this specific student session')
+                            ->searchable(),
                         Forms\Components\Select::make('status')
                             ->options([
                                 'scheduled' => 'Scheduled',
@@ -97,7 +172,23 @@ class SessionsRelationManager extends RelationManager
                                 'missed' => 'Missed',
                             ])
                             ->required(),
+                        Forms\Components\TextInput::make('score')
+                            ->numeric()
+                            ->minValue(0)
+                            ->maxValue(100)
+                            ->step(0.1)
+                            ->suffix('/100'),
+                        Forms\Components\Select::make('grade')
+                            ->options([
+                                'A' => 'A (Excellent)',
+                                'B' => 'B (Good)',
+                                'C' => 'C (Fair)',
+                                'D' => 'D (Poor)',
+                                'F' => 'F (Fail)',
+                            ]),
                         Forms\Components\Textarea::make('notes')
+                            ->maxLength(65535),
+                        Forms\Components\Textarea::make('instructor_feedback')
                             ->maxLength(65535),
                     ]),
                 Tables\Actions\DetachAction::make(),

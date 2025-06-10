@@ -23,7 +23,7 @@ class UpcomingSessions extends BaseWidget
                     ->where('date', '>=', Carbon::today())
                     ->where('date', '<=', Carbon::today()->addDays(7))
                     ->where('status', 'scheduled')
-                    ->with(['student', 'session', 'student.instructor'])
+                    ->with(['student', 'session', 'session.instructor'])
                     ->orderBy('date', 'asc')
             )
             ->columns([
@@ -41,7 +41,7 @@ class UpcomingSessions extends BaseWidget
                     ->label('Session')
                     ->searchable()
                     ->icon('heroicon-m-academic-cap'),
-                Tables\Columns\TextColumn::make('student.instructor.name')
+                Tables\Columns\TextColumn::make('session.instructor.name')
                     ->label('Instructor')
                     ->sortable()
                     ->icon('heroicon-m-identification'),
