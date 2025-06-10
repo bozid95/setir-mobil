@@ -19,6 +19,8 @@ class Finance extends Model
         'type',
         'description',
         'status',
+        'due_date',
+        'payment_date',
     ];
 
     /**
@@ -38,6 +40,8 @@ class Finance extends Model
      */
     protected $casts = [
         'date' => 'datetime',
+        'due_date' => 'date',
+        'payment_date' => 'datetime',
         'amount' => 'decimal:2',
     ];
 

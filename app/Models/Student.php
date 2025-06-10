@@ -23,7 +23,6 @@ class Student extends Model
         'address',
         'register_date',
         'unique_code',
-        'user_id',
         'package_id',
     ];
 
@@ -77,12 +76,12 @@ class Student extends Model
     }
 
     /**
-     * Get the sessions for this student.
+     * Get the sessions for this student through pivot table.
      */
     public function sessions(): BelongsToMany
     {
         return $this->belongsToMany(Session::class, 'student_sessions')
-            ->withPivot(['date', 'status', 'notes', 'score', 'grade', 'instructor_feedback'])
+            ->withPivot(['scheduled_date', 'status', 'notes', 'score', 'grade', 'instructor_feedback'])
             ->withTimestamps();
     }
 

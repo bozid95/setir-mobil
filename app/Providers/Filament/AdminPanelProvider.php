@@ -70,11 +70,17 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
+                // Essential Dashboard Widgets (Primary)
                 \App\Filament\Widgets\DrivingSchoolStatsOverview::class,
-                \App\Filament\Widgets\StudentRegistrationsChart::class,
-                \App\Filament\Widgets\RevenueChart::class,
+                \App\Filament\Widgets\FinanceStatsOverview::class,
+                \App\Filament\Widgets\OverduePaymentsWidget::class,
                 \App\Filament\Widgets\LatestStudents::class,
-                \App\Filament\Widgets\UpcomingSessions::class,
+
+                // Additional Analytics Widgets (Secondary - available but not on main dashboard)
+                \App\Filament\Widgets\StudentRegistrationsChart::class,
+                \App\Filament\Widgets\PaymentStatusChart::class,
+                \App\Filament\Widgets\MonthlyFinanceChart::class,
+                \App\Filament\Widgets\RecentPaymentsWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -92,6 +98,7 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
                 'Driving School',
                 'Management',
+                'Finance',
                 'Reports',
                 'Settings'
             ])
