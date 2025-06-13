@@ -62,7 +62,7 @@ class StudentsRelationManager extends RelationManager
                     })
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('pivot.date')
+                Tables\Columns\TextColumn::make('pivot.scheduled_date')
                     ->label('Date & Time')
                     ->dateTime('d M Y, H:i')
                     ->sortable(),
@@ -106,11 +106,11 @@ class StudentsRelationManager extends RelationManager
                     ->preloadRecordSelect()
                     ->form(fn(Tables\Actions\AttachAction $action): array => [
                         $action->getRecordSelect(),
-                        Forms\Components\DateTimePicker::make('date')
+                        Forms\Components\DateTimePicker::make('scheduled_date')
                             ->required(),
                         Forms\Components\Select::make('instructor_id')
                             ->label('Assign Instructor')
-                            ->relationship('instructor', 'name')
+                            ->options(\App\Models\Instructor::pluck('name', 'id'))
                             ->required()
                             ->preload()
                             ->helperText('Select the instructor for this specific student session')
@@ -147,11 +147,11 @@ class StudentsRelationManager extends RelationManager
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->form(fn(Tables\Actions\EditAction $action): array => [
-                        Forms\Components\DateTimePicker::make('date')
+                        Forms\Components\DateTimePicker::make('scheduled_date')
                             ->required(),
                         Forms\Components\Select::make('instructor_id')
                             ->label('Assign Instructor')
-                            ->relationship('instructor', 'name')
+                            ->options(\App\Models\Instructor::pluck('name', 'id'))
                             ->required()
                             ->preload()
                             ->helperText('Select the instructor for this specific student session')

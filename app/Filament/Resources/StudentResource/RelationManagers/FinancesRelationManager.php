@@ -60,6 +60,23 @@ class FinancesRelationManager extends RelationManager
                             ])
                             ->required()
                             ->default('pending'),
+                        Forms\Components\DateTimePicker::make('payment_date')
+                            ->label('Payment Date')
+                            ->nullable()
+                            ->displayFormat('d/m/Y H:i')
+                            ->helperText('Leave empty if payment is still pending'),
+                        Forms\Components\FileUpload::make('payment_receipt')
+                            ->label('Payment Receipt / Proof of Payment')
+                            ->directory('payment-receipts')
+                            ->acceptedFileTypes(['image/*', 'application/pdf'])
+                            ->maxSize(5120) // 5MB
+                            ->columnSpanFull()
+                            ->helperText('Upload payment receipt, transfer proof, or invoice (Max 5MB)'),
+                        Forms\Components\Textarea::make('receipt_notes')
+                            ->label('Receipt Notes')
+                            ->placeholder('Additional notes about the payment receipt...')
+                            ->maxLength(500)
+                            ->columnSpanFull(),
                         Forms\Components\Textarea::make('description')
                             ->label('Description')
                             ->maxLength(65535)
@@ -133,6 +150,21 @@ class FinancesRelationManager extends RelationManager
                     ->placeholder('Not paid yet')
                     ->toggleable(),
 
+                Tables\Columns\IconColumn::make('payment_receipt')
+                    ->label('Receipt')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-document-text')
+                    ->falseIcon('heroicon-o-x-mark')
+                    ->trueColor('success')
+                    ->falseColor('gray')
+                    ->tooltip(fn($record) => $record->payment_receipt ? 'Receipt uploaded' : 'No receipt'),
+
+                Tables\Columns\TextColumn::make('receipt_notes')
+                    ->label('Receipt Notes')
+                    ->limit(30)
+                    ->tooltip(fn($record) => $record->receipt_notes)
+                    ->toggleable(isToggledHiddenByDefault: true),
+
                 Tables\Columns\TextColumn::make('description')
                     ->label('Description')
                     ->limit(30)
@@ -190,6 +222,14 @@ class FinancesRelationManager extends RelationManager
 
                 Tables\Actions\EditAction::make()
                     ->label('Edit'),
+
+                Tables\Actions\Action::make('download_receipt')
+                    ->label('Download Receipt')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('info')
+                    ->url(fn($record) => $record->payment_receipt ? asset('storage/' . $record->payment_receipt) : null)
+                    ->openUrlInNewTab()
+                    ->visible(fn($record) => !empty($record->payment_receipt)),
 
                 Tables\Actions\DeleteAction::make()
                     ->label('Delete'),

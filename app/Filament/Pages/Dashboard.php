@@ -12,18 +12,22 @@ class Dashboard extends BaseDashboard
 
     protected static string $view = 'filament.pages.dashboard';
 
+    protected static ?string $navigationLabel = 'Dashboard';
+
+    // Make sure this dashboard takes priority
+    protected static ?int $navigationSort = -2;
+
     public function getWidgets(): array
     {
         return [
-            // Essential Overview Stats (Top Priority)
+            // Essential Overview Stats
             \App\Filament\Widgets\DrivingSchoolStatsOverview::class,
-            \App\Filament\Widgets\FinanceStatsOverview::class,
+
+            // Latest Activity
+            \App\Filament\Widgets\LatestStudents::class,
 
             // Critical Finance Information
             \App\Filament\Widgets\OverduePaymentsWidget::class,
-
-            // Key Activity Data
-            \App\Filament\Widgets\LatestStudents::class,
         ];
     }
 
@@ -31,8 +35,7 @@ class Dashboard extends BaseDashboard
     {
         return [
             'sm' => 1,
-            'md' => 2,
-            'xl' => 2,
+            'lg' => 3,
         ];
     }
 }

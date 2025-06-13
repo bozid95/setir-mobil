@@ -15,8 +15,20 @@ class Instructor extends Model
         'name',
         'email',
         'phone_number',
+        'address',
         'license_number',
-        'experience_years',
+        'license_expiry',
+        'is_active',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'license_expiry' => 'date',
+        'is_active' => 'boolean',
     ];
 
     /**

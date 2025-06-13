@@ -102,108 +102,152 @@
     <!-- Registration Modal -->
     <div id="registrationModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
         <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-2xl font-bold text-gray-800">Register for Package</h3>
-                    <button onclick="closeRegistrationModal()" class="text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-times text-xl"></i>
-                    </button>
+            <div class="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+                <div class="sticky top-0 bg-white p-6 border-b border-gray-200">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-2xl font-bold text-gray-800">Register for Package</h3>
+                        <button onclick="closeRegistrationModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
                 </div>
 
-                <form action="{{ route('student.register') }}" method="POST">
-                    @csrf
-                    <input type="hidden" id="package_id" name="package_id">
+                <div class="p-6">
 
-                    <div class="mb-4">
-                        <label class="block text-gray-700 font-semibold mb-2">
-                            Full Name <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" name="name" required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                    </div>
+                    <form action="{{ route('student.register') }}" method="POST">
+                        @csrf
+                        <input type="hidden" id="package_id" name="package_id">
 
-                    <div class="mb-4">
-                        <label class="block text-gray-700 font-semibold mb-2">Email (Optional)</label>
-                        <input type="email" name="email"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                    </div>
+                        <!-- Personal Information Section -->
+                        <div class="mb-6">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-3 border-b pb-2">Personal Information</h4>
 
-                    <div class="mb-4">
-                        <label class="block text-gray-700 font-semibold mb-2">Phone Number (Optional)</label>
-                        <input type="tel" name="phone_number"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                    </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 font-semibold mb-2">
+                                    Full Name <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" name="name" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            </div>
 
-                    <div class="mb-6">
-                        <label class="block text-gray-700 font-semibold mb-2">Address (Optional)</label>
-                        <textarea name="address" rows="3"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
-                    </div>
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-gray-700 font-semibold mb-2">Gender (Optional)</label>
+                                    <select name="gender"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                        <option value="">Select Gender</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 font-semibold mb-2">Date of Birth
+                                        (Optional)</label>
+                                    <input type="date" name="date_of_birth"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                </div>
+                            </div>
 
-                    <button type="submit"
-                        class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
-                        <i class="fas fa-user-plus mr-2"></i>Complete Registration
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 font-semibold mb-2">Place of Birth (Optional)</label>
+                                <input type="text" name="place_of_birth" placeholder="e.g. Jakarta"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            </div>
 
-    <!-- Success/Error Messages -->
-    @if (session('success'))
-        <div class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
-            <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
-        </div>
-    @endif
+                            <div class="mb-4">
+                                <label class="block text-gray-700 font-semibold mb-2">Occupation/Job (Optional)</label>
+                                <input type="text" name="occupation" placeholder="e.g. Student, Teacher, Engineer"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
 
-    @if (session('error'))
-        <div class="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
-            <i class="fas fa-exclamation-circle mr-2"></i>{{ session('error') }}
-        </div>
-    @endif
+                        <!-- Contact Information Section -->
+                        <div class="mb-6">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-3 border-b pb-2">Contact Information</h4>
 
-    @if ($errors->any())
-        <div class="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 max-w-md">
-            <div class="flex items-start">
-                <i class="fas fa-exclamation-triangle mr-2 mt-1"></i>
-                <div>
-                    <div class="font-semibold mb-1">Registration Error:</div>
-                    <ul class="text-sm">
-                        @foreach ($errors->all() as $error)
-                            <li>• {{ $error }}</li>
-                        @endforeach
-                    </ul>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 font-semibold mb-2">Email (Optional)</label>
+                                <input type="email" name="email" placeholder="your.email@example.com"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-gray-700 font-semibold mb-2">Phone Number (Optional)</label>
+                                <input type="tel" name="phone_number" placeholder="081234567890"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <div class="mb-6">
+                                <label class="block text-gray-700 font-semibold mb-2">Address (Optional)</label>
+                                <textarea name="address" rows="3" placeholder="Your complete address"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+                            </div>
+                        </div>
+
+                        <button type="submit"
+                            class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
+                            <i class="fas fa-user-plus mr-2"></i>Complete Registration
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
-    @endif
 
-    <script>
-        function openRegistrationModal(packageId, packageName, packagePrice) {
-            document.getElementById('package_id').value = packageId;
-            document.getElementById('registrationModal').classList.remove('hidden');
-        }
+        <!-- Success/Error Messages -->
+        @if (session('success'))
+            <div class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+                <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
+            </div>
+        @endif
 
-        function closeRegistrationModal() {
-            document.getElementById('registrationModal').classList.add('hidden');
-        }
+        @if (session('error'))
+            <div class="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+                <i class="fas fa-exclamation-circle mr-2"></i>{{ session('error') }}
+            </div>
+        @endif
 
-        // Smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
+        @if ($errors->any())
+            <div class="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 max-w-md">
+                <div class="flex items-start">
+                    <i class="fas fa-exclamation-triangle mr-2 mt-1"></i>
+                    <div>
+                        <div class="font-semibold mb-1">Registration Error:</div>
+                        <ul class="text-sm">
+                            @foreach ($errors->all() as $error)
+                                <li>• {{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <script>
+            function openRegistrationModal(packageId, packageName, packagePrice) {
+                document.getElementById('package_id').value = packageId;
+                document.getElementById('registrationModal').classList.remove('hidden');
+            }
+
+            function closeRegistrationModal() {
+                document.getElementById('registrationModal').classList.add('hidden');
+            }
+
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
                 });
             });
-        });
 
-        // Auto-hide success/error messages
-        setTimeout(() => {
-            const messages = document.querySelectorAll('.fixed.bottom-4.right-4');
-            messages.forEach(msg => msg.style.display = 'none');
-        }, 5000);
-    </script>
+            // Auto-hide success/error messages
+            setTimeout(() => {
+                const messages = document.querySelectorAll('.fixed.bottom-4.right-4');
+                messages.forEach(msg => msg.style.display = 'none');
+            }, 5000);
+        </script>
 </body>
 
 </html>

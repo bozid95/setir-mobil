@@ -22,11 +22,10 @@ class Session extends Model
      * @var array<string>
      */
     protected $fillable = [
-        'package_id',
-        'instructor_id',
+        'name',
         'order',
-        'title',
         'description',
+        'package_id',
     ];
 
     /**
@@ -45,14 +44,6 @@ class Session extends Model
     public function package(): BelongsTo
     {
         return $this->belongsTo(Package::class);
-    }
-
-    /**
-     * Get the instructor that owns the session.
-     */
-    public function instructor(): BelongsTo
-    {
-        return $this->belongsTo(Instructor::class);
     }
 
     /**
@@ -85,7 +76,7 @@ class Session extends Model
     public function students(): BelongsToMany
     {
         return $this->belongsToMany(Student::class, 'student_sessions')
-            ->withPivot(['date', 'status', 'notes', 'score', 'grade', 'instructor_feedback'])
+            ->withPivot(['instructor_id', 'scheduled_date', 'status', 'notes', 'score', 'grade', 'instructor_feedback'])
             ->withTimestamps();
     }
 }

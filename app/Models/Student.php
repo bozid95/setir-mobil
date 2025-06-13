@@ -18,6 +18,10 @@ class Student extends Model
      */
     protected $fillable = [
         'name',
+        'gender',
+        'place_of_birth',
+        'date_of_birth',
+        'occupation',
         'email',
         'phone_number',
         'address',
@@ -32,6 +36,7 @@ class Student extends Model
      * @var array<string, string>
      */
     protected $casts = [
+        'date_of_birth' => 'date',
         'register_date' => 'date',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
@@ -81,7 +86,7 @@ class Student extends Model
     public function sessions(): BelongsToMany
     {
         return $this->belongsToMany(Session::class, 'student_sessions')
-            ->withPivot(['scheduled_date', 'status', 'notes', 'score', 'grade', 'instructor_feedback'])
+            ->withPivot(['instructor_id', 'scheduled_date', 'status', 'notes', 'score', 'grade', 'instructor_feedback'])
             ->withTimestamps();
     }
 

@@ -20,9 +20,13 @@ class LandingController extends Controller
     public function register(Request $request)
     {
         try {
-            // Validation sesuai dengan model Student
+            // Validation sesuai dengan model Student termasuk field baru
             $request->validate([
                 'name' => 'required|string|max:255',
+                'gender' => 'nullable|in:male,female',
+                'place_of_birth' => 'nullable|string|max:255',
+                'date_of_birth' => 'nullable|date|before:today',
+                'occupation' => 'nullable|string|max:255',
                 'email' => 'nullable|email',
                 'phone_number' => 'nullable|string|max:20',
                 'address' => 'nullable|string',
@@ -36,7 +40,24 @@ class LandingController extends Controller
                 'package_id' => $request->package_id,
             ];
 
-            // Tambahkan field optional jika ada
+            // Tambahkan field personal information jika ada
+            if ($request->filled('gender')) {
+                $studentData['gender'] = $request->gender;
+            }
+
+            if ($request->filled('place_of_birth')) {
+                $studentData['place_of_birth'] = $request->place_of_birth;
+            }
+
+            if ($request->filled('date_of_birth')) {
+                $studentData['date_of_birth'] = $request->date_of_birth;
+            }
+
+            if ($request->filled('occupation')) {
+                $studentData['occupation'] = $request->occupation;
+            }
+
+            // Tambahkan field contact information jika ada
             if ($request->filled('email')) {
                 $studentData['email'] = $request->email;
             }

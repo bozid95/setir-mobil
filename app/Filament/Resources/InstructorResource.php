@@ -30,7 +30,20 @@ class InstructorResource extends Resource
                         Forms\Components\TextInput::make('name')
                             ->required()
                             ->maxLength(255),
-                    ]),
+                        Forms\Components\TextInput::make('email')
+                            ->email()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('phone_number')
+                            ->maxLength(20),
+                        Forms\Components\Textarea::make('address')
+                            ->maxLength(500)
+                            ->rows(3),
+                        Forms\Components\TextInput::make('license_number')
+                            ->maxLength(50),
+                        Forms\Components\DatePicker::make('license_expiry'),
+                        Forms\Components\Toggle::make('is_active')
+                            ->default(true),
+                    ])->columns(2),
             ]);
     }
 
@@ -40,9 +53,25 @@ class InstructorResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('students_count')
-                    ->counts('students')
-                    ->label('Students'),
+                Tables\Columns\TextColumn::make('email')
+                    ->searchable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('phone_number')
+                    ->label('Phone')
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('license_number')
+                    ->label('License')
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('license_expiry')
+                    ->label('License Expiry')
+                    ->date()
+                    ->toggleable(),
+                Tables\Columns\IconColumn::make('is_active')
+                    ->label('Active')
+                    ->boolean(),
+                Tables\Columns\TextColumn::make('student_sessions_count')
+                    ->counts('studentSessions')
+                    ->label('Active Sessions'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -70,7 +99,7 @@ class InstructorResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RelationManagers\StudentsRelationManager::class,
+            //
         ];
     }
 

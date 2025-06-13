@@ -16,7 +16,7 @@ class StudentSession extends Model
         'student_id',
         'session_id',
         'instructor_id',
-        'date',
+        'scheduled_date',
         'status',
         'notes',
         'score',
@@ -40,7 +40,7 @@ class StudentSession extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'date' => 'datetime',
+        'scheduled_date' => 'datetime',
     ];
 
     /**

@@ -21,6 +21,8 @@ class Finance extends Model
         'status',
         'due_date',
         'payment_date',
+        'payment_receipt',
+        'receipt_notes',
     ];
 
     /**

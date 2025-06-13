@@ -51,9 +51,29 @@ class FinanceResource extends Resource
                 ])
                 ->required()
                 ->default('pending'),
+            Forms\Components\DatePicker::make('due_date')
+                ->label('Due Date')
+                ->nullable(),
+            Forms\Components\DateTimePicker::make('payment_date')
+                ->label('Payment Date')
+                ->nullable()
+                ->displayFormat('d/m/Y H:i'),
+            Forms\Components\FileUpload::make('payment_receipt')
+                ->label('Payment Receipt / Proof of Payment')
+                ->directory('payment-receipts')
+                ->acceptedFileTypes(['image/*', 'application/pdf'])
+                ->maxSize(5120) // 5MB
+                ->columnSpanFull()
+                ->helperText('Upload payment receipt, transfer proof, or invoice (Max 5MB). Supported formats: JPG, PNG, PDF'),
+            Forms\Components\Textarea::make('receipt_notes')
+                ->label('Receipt Notes')
+                ->placeholder('Additional notes about the payment receipt...')
+                ->maxLength(500)
+                ->columnSpanFull(),
             Forms\Components\Textarea::make('description')
                 ->label('Description')
-                ->maxLength(65535),
+                ->maxLength(65535)
+                ->columnSpanFull(),
         ]);
     }
 
@@ -73,15 +93,41 @@ class FinanceResource extends Resource
                 ->money('IDR')
                 ->sortable(),
             Tables\Columns\TextColumn::make('type')
-                ->label('Type'),
+                ->label('Type')
+                ->badge()
+                ->color(fn(string $state): string => match ($state) {
+                    'tuition' => 'success',
+                    'registration' => 'info',
+                    'material' => 'warning',
+                    'exam' => 'primary',
+                    default => 'gray',
+                }),
             Tables\Columns\TextColumn::make('status')
                 ->label('Status')
                 ->badge()
-                ->color(fn (string $state): string => match ($state) {
+                ->color(fn(string $state): string => match ($state) {
                     'pending' => 'warning',
                     'paid' => 'success',
                     'cancelled' => 'danger',
                 }),
+            Tables\Columns\IconColumn::make('payment_receipt')
+                ->label('Receipt')
+                ->boolean()
+                ->trueIcon('heroicon-o-document-text')
+                ->falseIcon('heroicon-o-x-mark')
+                ->trueColor('success')
+                ->falseColor('gray')
+                ->tooltip(fn($record) => $record->payment_receipt ? 'Receipt uploaded' : 'No receipt'),
+            Tables\Columns\TextColumn::make('due_date')
+                ->label('Due Date')
+                ->date()
+                ->sortable()
+                ->toggleable(isToggledHiddenByDefault: true),
+            Tables\Columns\TextColumn::make('payment_date')
+                ->label('Payment Date')
+                ->dateTime()
+                ->sortable()
+                ->toggleable(isToggledHiddenByDefault: true),
         ])->filters([
             Tables\Filters\SelectFilter::make('status')
                 ->options([
@@ -89,9 +135,26 @@ class FinanceResource extends Resource
                     'paid' => 'Paid',
                     'cancelled' => 'Cancelled',
                 ]),
+            Tables\Filters\SelectFilter::make('type')
+                ->options([
+                    'tuition' => 'Tuition Fee',
+                    'registration' => 'Registration Fee',
+                    'material' => 'Material Fee',
+                    'exam' => 'Exam Fee',
+                ]),
+            Tables\Filters\Filter::make('has_receipt')
+                ->label('Has Receipt')
+                ->query(fn($query) => $query->whereNotNull('payment_receipt')),
         ])->actions([
+            Tables\Actions\ViewAction::make(),
             Tables\Actions\EditAction::make(),
             Tables\Actions\DeleteAction::make(),
+            Tables\Actions\Action::make('download_receipt')
+                ->label('Download Receipt')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->url(fn($record) => $record->payment_receipt ? asset('storage/' . $record->payment_receipt) : null)
+                ->openUrlInNewTab()
+                ->visible(fn($record) => !empty($record->payment_receipt)),
         ])->bulkActions([
             Tables\Actions\BulkActionGroup::make([
                 Tables\Actions\DeleteBulkAction::make(),

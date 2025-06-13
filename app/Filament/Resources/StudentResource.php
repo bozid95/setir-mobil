@@ -25,11 +25,29 @@ class StudentResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Student Information')
+                Forms\Components\Section::make('Personal Information')
                     ->schema([
                         Forms\Components\TextInput::make('name')
                             ->required()
                             ->maxLength(255),
+                        Forms\Components\Select::make('gender')
+                            ->options([
+                                'male' => 'Male',
+                                'female' => 'Female',
+                            ])
+                            ->placeholder('Select gender'),
+                        Forms\Components\TextInput::make('place_of_birth')
+                            ->label('Place of Birth')
+                            ->maxLength(255),
+                        Forms\Components\DatePicker::make('date_of_birth')
+                            ->label('Date of Birth')
+                            ->native(false),
+                        Forms\Components\TextInput::make('occupation')
+                            ->label('Occupation/Job')
+                            ->maxLength(255),
+                    ])->columns(2),
+                Forms\Components\Section::make('Contact Information')
+                    ->schema([
                         Forms\Components\TextInput::make('email')
                             ->email()
                             ->maxLength(255),
@@ -39,7 +57,7 @@ class StudentResource extends Resource
                         Forms\Components\Textarea::make('address')
                             ->maxLength(1000)
                             ->columnSpanFull(),
-                    ]),
+                    ])->columns(2),
                 Forms\Components\Section::make('Registration Details')
                     ->schema([
                         Forms\Components\DatePicker::make('register_date')
@@ -52,7 +70,7 @@ class StudentResource extends Resource
                             ->required()
                             ->preload()
                             ->helperText('Select the training package for this student'),
-                    ]),
+                    ])->columns(2),
             ]);
     }
 
@@ -63,10 +81,35 @@ class StudentResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('gender')
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'male' => 'info',
+                        'female' => 'success',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn(string $state): string => match ($state) {
+                        'male' => 'Male',
+                        'female' => 'Female',
+                        default => 'N/A',
+                    }),
+                Tables\Columns\TextColumn::make('date_of_birth')
+                    ->label('Birth Date')
+                    ->date()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('occupation')
+                    ->label('Job')
+                    ->limit(20)
+                    ->tooltip(function (Tables\Columns\TextColumn $column): ?string {
+                        $state = $column->getState();
+                        return strlen($state) > 20 ? $state : null;
+                    }),
                 Tables\Columns\TextColumn::make('email')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('phone_number')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('register_date')
                     ->date()
                     ->sortable(),
@@ -86,12 +129,18 @@ class StudentResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('gender')
+                    ->options([
+                        'male' => 'Male',
+                        'female' => 'Female',
+                    ]),
+                Tables\Filters\SelectFilter::make('package_id')
+                    ->relationship('package', 'name')
+                    ->label('Package'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

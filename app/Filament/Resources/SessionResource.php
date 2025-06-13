@@ -27,22 +27,18 @@ class SessionResource extends Resource
             ->schema([
                 Forms\Components\Section::make('Session Details')
                     ->schema([
+                        Forms\Components\TextInput::make('name')
+                            ->required()
+                            ->maxLength(255)
+                            ->helperText('Name of the driving session'),
                         Forms\Components\Select::make('package_id')
                             ->relationship('package', 'name')
                             ->required()
                             ->preload(),
-                        Forms\Components\Select::make('instructor_id')
-                            ->relationship('instructor', 'name')
-                            ->required()
-                            ->preload()
-                            ->helperText('Select the instructor who will conduct this session'),
                         Forms\Components\TextInput::make('order')
                             ->required()
                             ->numeric()
                             ->helperText('Session order within the package'),
-                        Forms\Components\TextInput::make('title')
-                            ->required()
-                            ->maxLength(255),
                         Forms\Components\Textarea::make('description')
                             ->maxLength(1000)
                             ->columnSpanFull(),
@@ -54,22 +50,22 @@ class SessionResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('name')
+                    ->label('Session Name')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('package.name')
                     ->label('Package')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('instructor.name')
-                    ->label('Instructor')
-                    ->searchable()
-                    ->sortable()
-                    ->icon('heroicon-m-user'),
                 Tables\Columns\TextColumn::make('order')
                     ->label('Order')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('title')
-                    ->searchable()
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('description')
+                    ->label('Description')
+                    ->limit(50)
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('students_count')
                     ->counts('students')
                     ->label('Students')

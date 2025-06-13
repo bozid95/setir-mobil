@@ -19,7 +19,7 @@ class SessionsRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                Forms\Components\DateTimePicker::make('date')
+                Forms\Components\DateTimePicker::make('scheduled_date')
                     ->required(),
                 Forms\Components\Select::make('status')
                     ->options([
@@ -39,34 +39,29 @@ class SessionsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('title')
+            ->recordTitleAttribute('name')
             ->columns([
-                Tables\Columns\TextColumn::make('title')
+                Tables\Columns\TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('instructor.name')
-                    ->label('Session Instructor')
-                    ->searchable()
-                    ->sortable()
-                    ->description('Default instructor for this session'),
+                Tables\Columns\TextColumn::make('order')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('assigned_instructor')
                     ->label('Assigned Instructor')
-                    ->searchable()
-                    ->sortable()
-                    ->description('Actual instructor assigned to this student')
                     ->getStateUsing(function ($record) {
-                        // Get the student session data from pivot
-                        $studentSession = \App\Models\StudentSession::where('student_id', request()->route('record'))
+                        $student = $this->getOwnerRecord();
+                        $studentSession = \App\Models\StudentSession::where('student_id', $student->id)
                             ->where('session_id', $record->id)
+                            ->with('instructor')
                             ->first();
 
                         return $studentSession && $studentSession->instructor
                             ? $studentSession->instructor->name
-                            : $record->instructor->name;
-                    }),
-                Tables\Columns\TextColumn::make('order')
+                            : 'No instructor assigned';
+                    })
+                    ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('pivot.date')
+                Tables\Columns\TextColumn::make('pivot.scheduled_date')
                     ->label('Date & Time')
                     ->dateTime('d M Y, H:i')
                     ->sortable(),
@@ -108,17 +103,17 @@ class SessionsRelationManager extends RelationManager
             ->headerActions([
                 Tables\Actions\AttachAction::make()
                     ->preloadRecordSelect()
+                    ->recordSelectOptionsQuery(fn(Builder $query) => $query->orderBy('name'))
                     ->form(fn(Tables\Actions\AttachAction $action): array => [
                         $action->getRecordSelect(),
-                        Forms\Components\DateTimePicker::make('date')
+                        Forms\Components\DateTimePicker::make('scheduled_date')
                             ->required(),
                         Forms\Components\Select::make('instructor_id')
                             ->label('Assign Instructor')
-                            ->relationship('instructor', 'name')
+                            ->options(\App\Models\Instructor::pluck('name', 'id'))
                             ->required()
-                            ->preload()
-                            ->helperText('Select the instructor for this specific student session')
-                            ->searchable(),
+                            ->searchable()
+                            ->helperText('Select the instructor for this specific student session'),
                         Forms\Components\Select::make('status')
                             ->options([
                                 'scheduled' => 'Scheduled',
@@ -155,15 +150,14 @@ class SessionsRelationManager extends RelationManager
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->form(fn(Tables\Actions\EditAction $action): array => [
-                        Forms\Components\DateTimePicker::make('date')
+                        Forms\Components\DateTimePicker::make('scheduled_date')
                             ->required(),
                         Forms\Components\Select::make('instructor_id')
                             ->label('Assign Instructor')
-                            ->relationship('instructor', 'name')
+                            ->options(\App\Models\Instructor::pluck('name', 'id'))
                             ->required()
-                            ->preload()
-                            ->helperText('Select the instructor for this specific student session')
-                            ->searchable(),
+                            ->searchable()
+                            ->helperText('Select the instructor for this specific student session'),
                         Forms\Components\Select::make('status')
                             ->options([
                                 'scheduled' => 'Scheduled',

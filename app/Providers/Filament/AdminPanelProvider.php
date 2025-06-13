@@ -66,21 +66,14 @@ class AdminPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                // Custom dashboard will be discovered automatically
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                // Essential Dashboard Widgets (Primary)
+                // Essential Dashboard Widgets Only
                 \App\Filament\Widgets\DrivingSchoolStatsOverview::class,
-                \App\Filament\Widgets\FinanceStatsOverview::class,
-                \App\Filament\Widgets\OverduePaymentsWidget::class,
                 \App\Filament\Widgets\LatestStudents::class,
-
-                // Additional Analytics Widgets (Secondary - available but not on main dashboard)
-                \App\Filament\Widgets\StudentRegistrationsChart::class,
-                \App\Filament\Widgets\PaymentStatusChart::class,
-                \App\Filament\Widgets\MonthlyFinanceChart::class,
-                \App\Filament\Widgets\RecentPaymentsWidget::class,
+                \App\Filament\Widgets\OverduePaymentsWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
