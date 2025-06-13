@@ -53,11 +53,33 @@
         <!-- Order Details Card -->
         <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
             <div class="text-center mb-8">
-                <h2 class="text-3xl font-bold text-gray-800 mb-2">Order Details</h2>
-                <div class="bg-blue-100 text-blue-800 px-6 py-3 rounded-lg font-mono font-bold text-xl inline-block">
-                    <i class="fas fa-code mr-2"></i>{{ $student->unique_code }}
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Registration Completed!</h2>
+                <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-lg font-mono font-bold text-2xl inline-block shadow-lg cursor-pointer hover:from-blue-600 hover:to-blue-700 transition-all"
+                    onclick="copyToClipboard('{{ $student->unique_code }}')" title="Click to copy unique code">
+                    <i class="fas fa-code mr-3"></i>{{ $student->unique_code }}
+                    <i class="fas fa-copy ml-3 text-lg"></i>
                 </div>
-                <p class="text-gray-600 mt-2">Please save this unique code for tracking your progress</p>
+                <p class="text-gray-600 mt-4 font-semibold">
+                    🔒 This is your unique tracking code - keep it safe!
+                </p>
+                <div class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div class="flex items-center justify-center">
+                        <i class="fas fa-lightbulb text-yellow-600 mr-2"></i>
+                        <p class="text-yellow-800 font-medium">
+                            Use this code to track your progress and access your student dashboard anytime
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Direct Dashboard Access Button -->
+                <div class="mt-6">
+                    <a href="{{ route('student.dashboard', ['code' => $student->unique_code]) }}"
+                        class="inline-flex items-center px-8 py-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-all shadow-lg">
+                        <i class="fas fa-tachometer-alt mr-3 text-lg"></i>
+                        <span class="text-lg">Access Your Dashboard Now</span>
+                        <i class="fas fa-arrow-right ml-3"></i>
+                    </a>
+                </div>
             </div>
 
             <div class="grid md:grid-cols-2 gap-8">
@@ -229,13 +251,43 @@
     </div>
 
     <script>
+        // Copy to clipboard function
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                // Show success message
+                showCopyMessage('Unique code copied to clipboard!');
+            }, function(err) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showCopyMessage('Unique code copied to clipboard!');
+            });
+        }
+
+        // Show copy success message
+        function showCopyMessage(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className =
+                'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all';
+            messageDiv.innerHTML = `<i class="fas fa-check-circle mr-2"></i>${message}`;
+            document.body.appendChild(messageDiv);
+
+            setTimeout(() => {
+                messageDiv.style.opacity = '0';
+                setTimeout(() => {
+                    document.body.removeChild(messageDiv);
+                }, 300);
+            }, 2000);
+        }
+
         // Auto-focus on unique code for easy copying
         document.addEventListener('DOMContentLoaded', function() {
-            // Add copy to clipboard functionality
             const uniqueCode = '{{ $student->unique_code }}';
-            const accountNumber = '{{ $bankDetails['account_number'] }}';
-
-            // You can add copy to clipboard buttons here if needed
+            console.log('Student registered with unique code:', uniqueCode);
         });
     </script>
 </body>

@@ -39,7 +39,7 @@
                 </div>
             </div>
 
-            <div class="grid md:grid-cols-2 gap-6">
+            <div class="grid md:grid-cols-3 gap-6">
                 <div>
                     <h3 class="text-lg font-semibold text-gray-700 mb-4">Personal Information</h3>
                     <div class="space-y-3">
@@ -70,6 +70,18 @@
                             <span class="text-gray-700">Registered:
                                 {{ $student->register_date ? $student->register_date->format('M j, Y') : 'N/A' }}</span>
                         </div>
+                        @if ($student->gender)
+                            <div class="flex items-center">
+                                <i class="fas fa-venus-mars text-blue-600 w-5 mr-3"></i>
+                                <span class="text-gray-700 capitalize">{{ $student->gender }}</span>
+                            </div>
+                        @endif
+                        @if ($student->date_of_birth)
+                            <div class="flex items-center">
+                                <i class="fas fa-birthday-cake text-blue-600 w-5 mr-3"></i>
+                                <span class="text-gray-700">{{ \Carbon\Carbon::parse($student->date_of_birth)->format('M j, Y') }}</span>
+                            </div>
+                        @endif
                     </div>
                 </div>
 
@@ -87,6 +99,30 @@
                     @else
                         <div class="bg-gray-50 p-4 rounded-lg text-center text-gray-500">
                             No package assigned yet
+                        </div>
+                    @endif
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Instructor Information</h3>
+                    @if (isset($instructor) && $instructor)
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-green-800 mb-2">{{ $instructor->name }}</h4>
+                            @if ($instructor->email)
+                                <p class="text-green-600 text-sm mb-1">
+                                    <i class="fas fa-envelope mr-1"></i>{{ $instructor->email }}
+                                </p>
+                            @endif
+                            @if ($instructor->phone)
+                                <p class="text-green-600 text-sm">
+                                    <i class="fas fa-phone mr-1"></i>{{ $instructor->phone }}
+                                </p>
+                            @endif
+                        </div>
+                    @else
+                        <div class="bg-gray-50 p-4 rounded-lg text-center text-gray-500">
+                            <i class="fas fa-user-tie text-2xl mb-2"></i>
+                            <p>No instructor assigned yet</p>
                         </div>
                     @endif
                 </div>
@@ -170,10 +206,15 @@
                             <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                                 <div>
                                     <h4 class="font-medium text-gray-800">
-                                        {{ $studentSession->session->title ?? 'Session' }}</h4>
+                                        {{ $studentSession->session->name ?? 'Session #' . $studentSession->id }}</h4>
                                     <p class="text-sm text-gray-600">
-                                        {{ $studentSession->date ? $studentSession->date->format('d M Y, H:i') : 'No date' }}
+                                        {{ $studentSession->scheduled_date ? \Carbon\Carbon::parse($studentSession->scheduled_date)->format('d M Y, H:i') : 'No date scheduled' }}
                                     </p>
+                                    @if($studentSession->instructor)
+                                        <p class="text-xs text-blue-600">
+                                            <i class="fas fa-user-tie mr-1"></i>{{ $studentSession->instructor->name }}
+                                        </p>
+                                    @endif
                                 </div>
                                 <div>
                                     @switch($studentSession->status)
@@ -240,11 +281,10 @@
                                     <p class="text-sm text-gray-600">{{ $finance->created_at->format('M j, Y') }}</p>
                                 </div>
                                 <div class="text-right">
-                                    <p
-                                        class="font-semibold {{ $finance->type === 'income' ? 'text-green-600' : 'text-red-600' }}">
-                                        {{ $finance->type === 'income' ? '+' : '-' }}Rp
-                                        {{ number_format($finance->amount, 0, ',', '.') }}
+                                    <p class="font-semibold text-blue-600">
+                                        Rp {{ number_format($finance->amount, 0, ',', '.') }}
                                     </p>
+                                    <p class="text-xs text-gray-500 capitalize">{{ $finance->type }}</p>
                                     @if (isset($finance->status))
                                         @switch($finance->status)
                                             @case('paid')

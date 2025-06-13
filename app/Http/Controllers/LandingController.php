@@ -8,6 +8,7 @@ use App\Models\StudentSession;
 use App\Models\Finance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Log;
 
 class LandingController extends Controller
 {
@@ -20,55 +21,31 @@ class LandingController extends Controller
     public function register(Request $request)
     {
         try {
-            // Validation sesuai dengan model Student termasuk field baru
+            // Validation dengan semua field menjadi required
             $request->validate([
                 'name' => 'required|string|max:255',
-                'gender' => 'nullable|in:male,female',
-                'place_of_birth' => 'nullable|string|max:255',
-                'date_of_birth' => 'nullable|date|before:today',
-                'occupation' => 'nullable|string|max:255',
-                'email' => 'nullable|email',
-                'phone_number' => 'nullable|string|max:20',
-                'address' => 'nullable|string',
+                'gender' => 'required|in:male,female',
+                'place_of_birth' => 'required|string|max:255',
+                'date_of_birth' => 'required|date|before:today',
+                'occupation' => 'required|string|max:255',
+                'email' => 'required|email|unique:students,email',
+                'phone_number' => 'required|string|max:20',
+                'address' => 'required|string',
                 'package_id' => 'required|exists:packages,id',
             ]);
 
-            // Create student sesuai dengan fillable fields di model
-            // unique_code dan register_date otomatis di-generate oleh model
+            // Create student dengan semua data yang diperlukan
             $studentData = [
                 'name' => $request->name,
                 'package_id' => $request->package_id,
+                'gender' => $request->gender,
+                'place_of_birth' => $request->place_of_birth,
+                'date_of_birth' => $request->date_of_birth,
+                'occupation' => $request->occupation,
+                'email' => $request->email,
+                'phone_number' => $request->phone_number,
+                'address' => $request->address,
             ];
-
-            // Tambahkan field personal information jika ada
-            if ($request->filled('gender')) {
-                $studentData['gender'] = $request->gender;
-            }
-
-            if ($request->filled('place_of_birth')) {
-                $studentData['place_of_birth'] = $request->place_of_birth;
-            }
-
-            if ($request->filled('date_of_birth')) {
-                $studentData['date_of_birth'] = $request->date_of_birth;
-            }
-
-            if ($request->filled('occupation')) {
-                $studentData['occupation'] = $request->occupation;
-            }
-
-            // Tambahkan field contact information jika ada
-            if ($request->filled('email')) {
-                $studentData['email'] = $request->email;
-            }
-
-            if ($request->filled('phone_number')) {
-                $studentData['phone_number'] = $request->phone_number;
-            }
-
-            if ($request->filled('address')) {
-                $studentData['address'] = $request->address;
-            }
 
             $student = Student::create($studentData);
 
@@ -80,10 +57,11 @@ class LandingController extends Controller
 
             $financeData = [
                 'student_id' => $student->id,
-                'date' => now(), // Add current date/time
+                'date' => now(),
                 'amount' => $package->price,
-                'type' => 'income',
+                'type' => 'registration',
                 'description' => 'Package registration fee - ' . $package->name,
+                'due_date' => now()->addDays(7), // Payment due in 7 days
             ];
 
             // Add status only if column exists
@@ -141,7 +119,7 @@ class LandingController extends Controller
     public function studentDashboard($code)
     {
         $student = Student::where('unique_code', $code)
-            ->with(['package', 'instructor', 'studentSessions.session', 'finances'])
+            ->with(['package', 'studentSessions.session', 'finances'])
             ->first();
 
         if (!$student) {
@@ -149,15 +127,32 @@ class LandingController extends Controller
                 ->with('error', 'Invalid tracking code.');
         }
 
-        // Calculate progress using studentSessions relationship
-        $totalSessions = $student->package ? $student->package->sessions()->count() : 0;
+        // Calculate progress based on actual database structure
+        $totalSessions = 0;
+        $completedSessions = 0;
+        
+        if ($student->package) {
+            // Count sessions in this package 
+            $totalSessions = \App\Models\Session::where('package_id', $student->package->id)->count();
+        }
+        
+        // Count completed student sessions
         $completedSessions = $student->studentSessions()->where('status', 'completed')->count();
+        
+        // Calculate progress percentage
         $progressPercentage = $totalSessions > 0 ? round(($completedSessions / $totalSessions) * 100) : 0;
 
-        // Get payment status
-        $totalPaymentDue = $student->finances()->where('type', 'income')->sum('amount');
-        $totalPaid = $student->finances()->where('type', 'income')->sum('amount'); // Show all amounts for now
-        $outstandingPayment = 0; // No outstanding since we're showing all
+        // Get payment status with correct finance types
+        $totalPaymentDue = $student->finances()->whereIn('type', ['registration', 'tuition', 'material', 'exam'])->sum('amount');
+        $totalPaid = $student->finances()->whereIn('type', ['registration', 'tuition', 'material', 'exam'])->where('status', 'paid')->sum('amount');
+        $outstandingPayment = $totalPaymentDue - $totalPaid;
+
+        // Get instructor from student sessions if any
+        $instructor = null;
+        $latestSession = $student->studentSessions()->with('instructor')->latest()->first();
+        if ($latestSession && $latestSession->instructor) {
+            $instructor = $latestSession->instructor;
+        }
 
         return view('landing.student-dashboard', compact(
             'student',
@@ -166,7 +161,8 @@ class LandingController extends Controller
             'totalSessions',
             'totalPaymentDue',
             'totalPaid',
-            'outstandingPayment'
+            'outstandingPayment',
+            'instructor'
         ));
     }
 
