@@ -139,7 +139,6 @@ try {
     } else {
         echo "❌ No existing students found\n";
     }
-
 } catch (Exception $e) {
     echo "❌ Error: " . $e->getMessage() . "\n";
     echo "Stack trace: " . $e->getTraceAsString() . "\n";

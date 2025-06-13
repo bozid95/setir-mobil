@@ -130,15 +130,15 @@ class LandingController extends Controller
         // Calculate progress based on actual database structure
         $totalSessions = 0;
         $completedSessions = 0;
-        
+
         if ($student->package) {
-            // Count sessions in this package 
+            // Count sessions in this package
             $totalSessions = \App\Models\Session::where('package_id', $student->package->id)->count();
         }
-        
+
         // Count completed student sessions
         $completedSessions = $student->studentSessions()->where('status', 'completed')->count();
-        
+
         // Calculate progress percentage
         $progressPercentage = $totalSessions > 0 ? round(($completedSessions / $totalSessions) * 100) : 0;
 

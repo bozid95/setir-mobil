@@ -118,7 +118,6 @@ try {
 
     echo "\n🚀 SYSTEM IS READY!\n";
     echo "Users can now register and immediately access their dashboard.\n";
-
 } catch (Exception $e) {
     echo "❌ Error: " . $e->getMessage() . "\n";
     echo "File: " . $e->getFile() . " Line: " . $e->getLine() . "\n";

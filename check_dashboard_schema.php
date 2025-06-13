@@ -45,7 +45,6 @@ try {
     // Check finances
     $finances = DB::table('finances')->count();
     echo "Finance records: {$finances}\n";
-
 } catch (Exception $e) {
     echo "❌ Error checking relationships: " . $e->getMessage() . "\n";
 }
@@ -69,11 +68,9 @@ try {
         // Check dashboard URL
         $dashboardUrl = "http://localhost:8000/student/{$student->unique_code}";
         echo "Dashboard URL: {$dashboardUrl}\n";
-
     } else {
         echo "❌ No students found in database\n";
     }
-
 } catch (Exception $e) {
     echo "❌ Error: " . $e->getMessage() . "\n";
 }

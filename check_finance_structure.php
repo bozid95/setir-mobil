@@ -24,6 +24,7 @@ if (Schema::hasTable('finances')) {
 
 // Check Finance model fillable
 use App\Models\Finance;
+
 $finance = new Finance();
 $fillable = $finance->getFillable();
 echo "\nFillable fields: " . implode(', ', $fillable) . "\n";
@@ -55,7 +56,6 @@ try {
     } else {
         echo "❌ Validation failed\n";
     }
-
 } catch (Exception $e) {
     echo "❌ Error: " . $e->getMessage() . "\n";
 }

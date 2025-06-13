@@ -79,7 +79,8 @@
                         @if ($student->date_of_birth)
                             <div class="flex items-center">
                                 <i class="fas fa-birthday-cake text-blue-600 w-5 mr-3"></i>
-                                <span class="text-gray-700">{{ \Carbon\Carbon::parse($student->date_of_birth)->format('M j, Y') }}</span>
+                                <span
+                                    class="text-gray-700">{{ \Carbon\Carbon::parse($student->date_of_birth)->format('M j, Y') }}</span>
                             </div>
                         @endif
                     </div>
@@ -210,9 +211,10 @@
                                     <p class="text-sm text-gray-600">
                                         {{ $studentSession->scheduled_date ? \Carbon\Carbon::parse($studentSession->scheduled_date)->format('d M Y, H:i') : 'No date scheduled' }}
                                     </p>
-                                    @if($studentSession->instructor)
+                                    @if ($studentSession->instructor)
                                         <p class="text-xs text-blue-600">
-                                            <i class="fas fa-user-tie mr-1"></i>{{ $studentSession->instructor->name }}
+                                            <i
+                                                class="fas fa-user-tie mr-1"></i>{{ $studentSession->instructor->name }}
                                         </p>
                                     @endif
                                 </div>
