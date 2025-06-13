@@ -169,9 +169,27 @@ class LandingController extends Controller
     public function trackStudent(Request $request)
     {
         $request->validate([
-            'tracking_code' => 'required|string',
+            'tracking_code' => 'required|string|min:8|max:20',
+        ], [
+            'tracking_code.required' => 'Please enter your tracking code.',
+            'tracking_code.min' => 'Tracking code must be at least 8 characters.',
+            'tracking_code.max' => 'Tracking code cannot exceed 20 characters.',
         ]);
 
-        return redirect()->route('student.dashboard', ['code' => $request->tracking_code]);
+        $trackingCode = trim(strtoupper($request->tracking_code));
+
+        // Check if student exists with this tracking code
+        $student = Student::where('unique_code', $trackingCode)->first();
+
+        if (!$student) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['tracking_code' => 'Invalid tracking code. Please check your code and try again.'])
+                ->with('error', 'Student not found with tracking code: ' . $trackingCode);
+        }
+
+        // Redirect to student dashboard with success message
+        return redirect()->route('student.dashboard', ['code' => $trackingCode])
+            ->with('success', 'Welcome back, ' . $student->name . '!');
     }
 }

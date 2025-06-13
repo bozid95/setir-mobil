@@ -80,7 +80,7 @@
         <div class="container mx-auto px-6">
             <div class="max-w-md mx-auto bg-white rounded-lg shadow-lg p-8">
                 <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">Track Your Progress</h2>
-                <form action="{{ route('student.track') }}" method="POST">
+                <form id="trackProgressForm" action="{{ route('student.track') }}" method="POST">
                     @csrf
                     <div class="mb-6">
                         <label for="tracking_code" class="block text-gray-700 font-semibold mb-2">
@@ -141,7 +141,8 @@
                                         <option value="">Select Gender</option>
                                         <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>Male
                                         </option>
-                                        <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>Female
+                                        <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>
+                                            Female
                                         </option>
                                     </select>
                                 </div>
@@ -278,8 +279,8 @@
                 });
             }
 
-            // Form validation before submit
-            document.querySelector('form').addEventListener('submit', function(e) {
+            // Form validation before submit - Only for registration form
+            document.querySelector('#registrationModal form').addEventListener('submit', function(e) {
                 const requiredFields = [{
                         name: 'name',
                         label: 'Full Name'
@@ -376,6 +377,67 @@
                         behavior: 'smooth'
                     });
                 });
+            });
+
+            // Track Progress form handler
+            document.getElementById('trackProgressForm').addEventListener('submit', function(e) {
+                const submitButton = this.querySelector('button[type="submit"]');
+                const trackingCodeInput = this.querySelector('input[name="tracking_code"]');
+
+                // Visual feedback
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Searching...';
+
+                // Basic validation
+                if (!trackingCodeInput.value.trim()) {
+                    e.preventDefault();
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = '<i class="fas fa-search mr-2"></i>Track Progress';
+
+                    // Show error
+                    trackingCodeInput.classList.add('border-red-500');
+                    showTrackError('Please enter your tracking code.');
+                    return;
+                }
+
+                if (trackingCodeInput.value.trim().length < 8) {
+                    e.preventDefault();
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = '<i class="fas fa-search mr-2"></i>Track Progress';
+
+                    trackingCodeInput.classList.add('border-red-500');
+                    showTrackError('Tracking code must be at least 8 characters.');
+                    return;
+                }
+
+                // Clear any previous errors
+                trackingCodeInput.classList.remove('border-red-500');
+                hideTrackError();
+            });
+
+            function showTrackError(message) {
+                hideTrackError(); // Remove any existing error
+
+                const trackingCodeInput = document.querySelector('#trackProgressForm input[name="tracking_code"]');
+                const errorDiv = document.createElement('div');
+                errorDiv.id = 'track-error';
+                errorDiv.className = 'text-red-500 text-sm mt-2';
+                errorDiv.innerHTML = `<i class="fas fa-exclamation-circle mr-1"></i>${message}`;
+
+                trackingCodeInput.parentNode.appendChild(errorDiv);
+            }
+
+            function hideTrackError() {
+                const existingError = document.getElementById('track-error');
+                if (existingError) {
+                    existingError.remove();
+                }
+            }
+
+            // Clear error when user starts typing
+            document.querySelector('#trackProgressForm input[name="tracking_code"]').addEventListener('input', function() {
+                this.classList.remove('border-red-500');
+                hideTrackError();
             });
 
             // Auto-hide success/error messages

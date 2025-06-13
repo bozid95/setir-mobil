@@ -131,7 +131,7 @@
         </div>
 
         <!-- Stats Cards -->
-        <div class="grid md:grid-cols-4 gap-6 mb-8">
+        <div class="grid md:grid-cols-3 gap-6 mb-8">
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="flex items-center">
                     <div class="p-3 rounded-full bg-blue-100 text-blue-600">
@@ -168,19 +168,6 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center">
-                    <div
-                        class="p-3 rounded-full {{ $outstandingPayment > 0 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600' }}">
-                        <i class="fas fa-dollar-sign text-xl"></i>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Outstanding</p>
-                        <p class="text-lg font-semibold text-gray-900">Rp
-                            {{ number_format($outstandingPayment, 0, ',', '.') }}</p>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- Progress Bar -->
