@@ -4,6 +4,7 @@ namespace App\Filament\Widgets;
 
 use App\Models\Student;
 use App\Models\Session;
+use App\Models\StudentSession;
 use App\Models\Instructor;
 use App\Models\Package;
 use App\Models\Finance;
@@ -36,28 +37,19 @@ class DrivingSchoolStatsOverview extends BaseWidget
                 ->descriptionIcon('heroicon-m-cube')
                 ->color('warning'),
 
-            Stat::make('Total Sessions', Session::count())
-                ->description('All training sessions')
+            Stat::make('This Week\'s Schedule', StudentSession::whereBetween('scheduled_date', [
+                now()->startOfWeek(),
+                now()->endOfWeek()
+            ])->count())
+                ->description('Sessions scheduled for this week')
                 ->descriptionIcon('heroicon-m-calendar-days')
                 ->color('secondary'),
 
-            Stat::make('This Month\'s Revenue', 'Rp ' . number_format(
-                Finance::where('type', 'income')
-                    ->whereMonth('created_at', now()->month)
-                    ->whereYear('created_at', now()->year)
-                    ->sum('amount'),
-                0,
-                ',',
-                '.'
-            ))
-                ->description('Revenue for ' . now()->format('F Y'))
-                ->descriptionIcon('heroicon-m-banknotes')
-                ->color('success'),
         ];
     }
 
     protected function getColumns(): int
     {
-        return 3;
+        return 4;
     }
 }

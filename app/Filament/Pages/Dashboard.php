@@ -23,11 +23,26 @@ class Dashboard extends BaseDashboard
             // Essential Overview Stats
             \App\Filament\Widgets\DrivingSchoolStatsOverview::class,
 
-            // Latest Activity
-            \App\Filament\Widgets\LatestStudents::class,
+            // Today's Schedule Stats
+            \App\Filament\Widgets\TodayScheduleStatsWidget::class,
 
-            // Critical Finance Information
-            \App\Filament\Widgets\OverduePaymentsWidget::class,
+            // Monthly Revenue Stats
+            \App\Filament\Widgets\MonthlyRevenueStatsWidget::class,
+
+            // Weekly Schedule
+            \App\Filament\Widgets\WeeklyScheduleWidget::class,
+
+            // Monthly Revenue Chart
+            \App\Filament\Widgets\MonthlyRevenueChartWidget::class,
+
+            // Monthly Revenue Details
+            \App\Filament\Widgets\MonthlyRevenueTableWidget::class,
+
+            // // Latest Activity
+            // \App\Filament\Widgets\LatestStudents::class,
+
+            // // Critical Finance Information
+            // \App\Filament\Widgets\OverduePaymentsWidget::class,
         ];
     }
 
