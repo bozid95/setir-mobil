@@ -22,10 +22,10 @@ class DrivingSchoolStatsOverview extends BaseWidget
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('success'),
 
-            Stat::make('Active Sessions', Session::whereHas('students')->count())
-                ->description('Sessions with enrolled students')
-                ->descriptionIcon('heroicon-m-users')
-                ->color('primary'),
+            // Stat::make('Active Sessions', Session::whereHas('students')->count())
+            //     ->description('Sessions with enrolled students')
+            //     ->descriptionIcon('heroicon-m-users')
+            //     ->color('primary'),
 
             Stat::make('Total Instructors', Instructor::count())
                 ->description('Available instructors')
