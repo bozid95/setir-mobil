@@ -10,7 +10,9 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\Filter;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Database\Eloquent\Builder;
 
 class FinanceResource extends Resource
 {
@@ -93,7 +95,12 @@ class FinanceResource extends Resource
             Tables\Columns\TextColumn::make('amount')
                 ->label('Amount')
                 ->money('IDR')
-                ->sortable(),
+                ->sortable()
+                ->summarize([
+                    Tables\Columns\Summarizers\Sum::make()
+                        ->money('IDR')
+                        ->label('Total'),
+                ]),
             Tables\Columns\TextColumn::make('type')
                 ->label('Type')
                 ->badge()
@@ -131,18 +138,40 @@ class FinanceResource extends Resource
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),
         ])->filters([
-            Tables\Filters\SelectFilter::make('status')
-                ->options([
-                    'pending' => 'Pending',
-                    'paid' => 'Paid',
-                    'cancelled' => 'Cancelled',
-                ]),
+            // Date Range Filter
+            Filter::make('date_range')
+                ->form([
+                    Forms\Components\DatePicker::make('date_from')
+                        ->label('Date From'),
+                    Forms\Components\DatePicker::make('date_until')
+                        ->label('Date Until'),
+                ])
+                ->query(function (Builder $query, array $data): Builder {
+                    return $query
+                        ->when(
+                            $data['date_from'],
+                            fn(Builder $query, $date): Builder => $query->whereDate('date', '>=', $date),
+                        )
+                        ->when(
+                            $data['date_until'],
+                            fn(Builder $query, $date): Builder => $query->whereDate('date', '<=', $date),
+                        );
+                }),
+
             Tables\Filters\SelectFilter::make('type')
                 ->options([
                     'tuition' => 'Tuition Fee',
                     'registration' => 'Registration Fee',
                     'material' => 'Material Fee',
                     'exam' => 'Exam Fee',
+                ])
+                ->label('Payment Type'),
+
+            Tables\Filters\SelectFilter::make('status')
+                ->options([
+                    'pending' => 'Pending',
+                    'paid' => 'Paid',
+                    'cancelled' => 'Cancelled',
                 ]),
             Tables\Filters\Filter::make('has_receipt')
                 ->label('Has Receipt')
