@@ -61,6 +61,6 @@ class WeeklyScheduleWidget extends BaseWidget
             ->defaultSort('scheduled_date', 'asc')
             ->emptyStateHeading('No sessions scheduled')
             ->emptyStateDescription('There are no sessions scheduled for this week.')
-            ->emptyStateIcon('heroicon-o-calendar-x-mark');
+            ->emptyStateIcon('heroicon-o-calendar-days');
     }
 }
