@@ -4,11 +4,13 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\FinanceResource\Pages;
 use App\Models\Finance;
+use App\Exports\FinanceExport;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Maatwebsite\Excel\Facades\Excel;
 
 class FinanceResource extends Resource
 {
@@ -145,21 +147,149 @@ class FinanceResource extends Resource
             Tables\Filters\Filter::make('has_receipt')
                 ->label('Has Receipt')
                 ->query(fn($query) => $query->whereNotNull('payment_receipt')),
-        ])->actions([
-            Tables\Actions\ViewAction::make(),
-            Tables\Actions\EditAction::make(),
-            Tables\Actions\DeleteAction::make(),
-            Tables\Actions\Action::make('download_receipt')
-                ->label('Download Receipt')
-                ->icon('heroicon-o-arrow-down-tray')
-                ->url(fn($record) => $record->payment_receipt ? asset('storage/' . $record->payment_receipt) : null)
-                ->openUrlInNewTab()
-                ->visible(fn($record) => !empty($record->payment_receipt)),
-        ])->bulkActions([
-            Tables\Actions\BulkActionGroup::make([
-                Tables\Actions\DeleteBulkAction::make(),
-            ]),
-        ]);
+        ])
+            ->headerActions([
+                Tables\Actions\Action::make('export')
+                    ->label('Export to Excel')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('success')
+                    ->action(function ($livewire) {
+                        $query = $livewire->getFilteredTableQuery();
+                        $finances = $query->with('student')->get();
+
+                        $filename = 'finance_report_' . now()->format('Y_m_d_H_i_s') . '.xlsx';
+
+                        return Excel::download(new FinanceExport($finances), $filename);
+                    }),
+
+                Tables\Actions\Action::make('export_csv')
+                    ->label('Export to CSV')
+                    ->icon('heroicon-o-document-text')
+                    ->color('info')
+                    ->action(function ($livewire) {
+                        $query = $livewire->getFilteredTableQuery();
+
+                        return response()->streamDownload(function () use ($query) {
+                            $finances = $query->with('student')->get();
+
+                            $handle = fopen('php://output', 'w');
+
+                            // Add BOM for UTF-8
+                            fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+                            // CSV Headers
+                            fputcsv($handle, [
+                                'No',
+                                'Date',
+                                'Student Name',
+                                'Student Code',
+                                'Type',
+                                'Amount',
+                                'Status',
+                                'Due Date',
+                                'Payment Date',
+                                'Description',
+                                'Has Receipt'
+                            ]);
+
+                            // CSV Data
+                            $no = 1;
+                            foreach ($finances as $finance) {
+                                fputcsv($handle, [
+                                    $no++,
+                                    $finance->date ? $finance->date->format('d/m/Y') : '',
+                                    $finance->student ? $finance->student->name : '',
+                                    $finance->student ? $finance->student->unique_code : '',
+                                    ucfirst($finance->type),
+                                    $finance->amount,
+                                    ucfirst($finance->status),
+                                    $finance->due_date ? $finance->due_date->format('d/m/Y') : '',
+                                    $finance->payment_date ? $finance->payment_date->format('d/m/Y H:i') : '',
+                                    $finance->description ?? '',
+                                    $finance->payment_receipt ? 'Ada Bukti' : 'Belum Ada'
+                                ]);
+                            }
+
+                            fclose($handle);
+                        }, 'finance_report_' . now()->format('Y_m_d_H_i_s') . '.csv', [
+                            'Content-Type' => 'text/csv; charset=utf-8',
+                            'Content-Disposition' => 'attachment; filename="finance_report_' . now()->format('Y_m_d_H_i_s') . '.csv"',
+                        ]);
+                    }),
+            ])->actions([
+                Tables\Actions\ViewAction::make(),
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\Action::make('download_receipt')
+                    ->label('Download Receipt')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->url(fn($record) => $record->payment_receipt ? asset('storage/' . $record->payment_receipt) : null)
+                    ->openUrlInNewTab()
+                    ->visible(fn($record) => !empty($record->payment_receipt)),
+            ])->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\BulkAction::make('export_selected_excel')
+                        ->label('Export Selected (Excel)')
+                        ->icon('heroicon-o-document-arrow-down')
+                        ->color('success')
+                        ->action(function ($records) {
+                            $filename = 'selected_finance_' . now()->format('Y_m_d_H_i_s') . '.xlsx';
+                            return Excel::download(new FinanceExport($records), $filename);
+                        }),
+
+                    Tables\Actions\BulkAction::make('export_selected_csv')
+                        ->label('Export Selected (CSV)')
+                        ->icon('heroicon-o-document-text')
+                        ->color('info')
+                        ->action(function ($records) {
+                            return response()->streamDownload(function () use ($records) {
+                                $handle = fopen('php://output', 'w');
+
+                                // Add BOM for UTF-8
+                                fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+                                // CSV Headers
+                                fputcsv($handle, [
+                                    'No',
+                                    'Date',
+                                    'Student Name',
+                                    'Student Code',
+                                    'Type',
+                                    'Amount',
+                                    'Status',
+                                    'Due Date',
+                                    'Payment Date',
+                                    'Description',
+                                    'Has Receipt'
+                                ]);
+
+                                // CSV Data
+                                $no = 1;
+                                foreach ($records as $finance) {
+                                    fputcsv($handle, [
+                                        $no++,
+                                        $finance->date ? $finance->date->format('d/m/Y') : '',
+                                        $finance->student ? $finance->student->name : '',
+                                        $finance->student ? $finance->student->unique_code : '',
+                                        ucfirst($finance->type),
+                                        $finance->amount,
+                                        ucfirst($finance->status),
+                                        $finance->due_date ? $finance->due_date->format('d/m/Y') : '',
+                                        $finance->payment_date ? $finance->payment_date->format('d/m/Y H:i') : '',
+                                        $finance->description ?? '',
+                                        $finance->payment_receipt ? 'Ada Bukti' : 'Belum Ada'
+                                    ]);
+                                }
+
+                                fclose($handle);
+                            }, 'selected_finance_' . now()->format('Y_m_d_H_i_s') . '.csv', [
+                                'Content-Type' => 'text/csv; charset=utf-8',
+                                'Content-Disposition' => 'attachment; filename="selected_finance_' . now()->format('Y_m_d_H_i_s') . '.csv"',
+                            ]);
+                        }),
+                ]),
+            ]);
     }
 
     public static function getRelations(): array
